@@ -54,6 +54,15 @@ PACT.md ─▶ 盤點 ─▶ 選模式(沿用/更新/疊加) ─▶ 預覽+雜�
 
 ## 核心設計
 
+- **一個來源，所有 agent 共用**：規則、skill、memory 放在同一個共用目錄。各 agent 自己的入口檔（`CLAUDE.md`、`AGENTS.md`…）加一個由共用 `rules.md` 渲染的標記區塊；skill 用連結接入；memory 一檔一事實並自動生成索引。改一次，所有 agent 同步。（`PACT.zh-TW.md` 第 3 節）
+
+```
+~/.agentpact/rules.md ──渲染──▶ CLAUDE.md［agentpact 區塊］
+                       └─渲染──▶ AGENTS.md［agentpact 區塊］
+~/.agentpact/skills/  ──連結──▶ 各 agent 的 skill 目錄
+~/.agentpact/memory/  ◀─讀寫── 所有支援檔案 memory 的 agent
+```
+
 - **預設保守**：判不出環境，一律當最高風險級；找不到紀錄不等於允許。
 - **兩階段**：階段 1 人確認每次變更；階段 2（需你手動開）只准追加一條更嚴的規則，放寬或刪除一律回階段 1。
 - **全部可選、先盤點**：不假設你有 herdr 或 hook。沒有的能力標「未啟用：原因」，並明說「只有操作前檢查，無強制攔截」。

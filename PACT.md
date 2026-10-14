@@ -20,7 +20,25 @@ Read `defaults/safety.md` first. Its minimum safety core cannot be disabled: **s
 
 Each agent generates its content from its own verified settings and memory, not from one fixed template. If agents share a file, state the read path and precedence.
 
-## 3. Inventory every component, then opt in
+## 3. Shared layer: one source, every agent
+
+This is what turns separate agents into one team. Propose it in the stage-1 preview; every piece is optional and capability-checked.
+
+```
+<shared root>/            e.g. ~/.agentpact/  (one directory, one owner)
+  rules.md                the pact: one source of truth for every agent
+  skills/<name>/SKILL.md  skills every agent can load
+  memory/                 shared memory, one fact per file
+    INDEX.md              one line per memory, generated, never hand-edited
+```
+
+- **Rules**: each agent's own entry file (for example `CLAUDE.md`, `AGENTS.md`) keeps its local content and gets a marked block, `<!-- agentpact:begin -->` ... `<!-- agentpact:end -->`, that includes or is rendered from `rules.md`. Change `rules.md`, re-render, and every agent sees the same rules. Agents never edit inside the block; changes go to `rules.md` through stage 1.
+- **Skills**: link (symlink, include, or copy with a recorded hash) each skill from `skills/` into every agent's skill directory. One skill, one source; record which agents can actually load it.
+- **Memory**: point every agent that supports file memory at `memory/`. Each file holds one fact, with front matter `name`, `description`, `type` (user / feedback / project / reference) and `scope` (global or a project name). Keep `INDEX.md` short. Before writing, look for an existing file that covers it; update rather than duplicate.
+- **Precedence**: platform policy > `rules.md` > an agent's local content. When two agents disagree about a fact, go back to the primary source (code, raw log, first-hand evidence); never decide by majority or confidence.
+- **What an agent cannot share**: if an agent cannot follow links or read the shared directory, give it a rendered copy and record the hash, so drift can be detected. Mark it "shared: copy, not live".
+
+## 4. Inventory every component, then opt in
 
 For each item record: evidence of current state, dependencies, enabled or "not enabled: reason", effect of leaving it off, and how to verify. Never skip the inventory because a component was not chosen.
 
@@ -35,7 +53,7 @@ For each item record: evidence of current state, dependencies, enabled or "not e
 | Token budget | A reliable usage signal | General economy only; no precise thresholds claimed |
 | boundary-check | `modules/boundary-check/SKILL.md` and on-site evidence | One less pre-action layer; the core still applies |
 
-## 4. Install gates
+## 5. Install gates
 
 **Stage 1 (default).** Produce the target paths, a full diff preview, the SHA-256 of each file to be written, the SHA-256 of each existing file, and a backup/restore method. Stop and ask the human to confirm that specific preview. After confirmation, recompute the hashes of the preview content and of the existing files before writing; if anything differs, preview again and re-confirm. Write only the approved files. After writing, recompute hashes, check the effective scope and record the verification. Silence is not confirmation.
 
@@ -43,6 +61,6 @@ For each item record: evidence of current state, dependencies, enabled or "not e
 
 In any environment, if existing policy forbids you from changing your own permissions, hooks or governance rules, propose a diff for a human or an independent process to apply; this prompt cannot lift that prohibition. Writes to the highest tier must not be performed through the install flow.
 
-## 5. Post-install report
+## 6. Post-install report
 
 Report, for each agent: its rules entry point, the components actually enabled, every component not enabled and why, the hook test result, whether enforced blocking exists, file hashes and checkable evidence. If you have no write authorization, deliver the preview and list clearly what is not installed. Never mark an unverified capability as enabled.

@@ -55,6 +55,15 @@ PACT.md -> inventory -> choose mode (keep / update / layer) -> preview + hashes 
 
 ## Design
 
+- **One source, every agent**: rules, skills and memory live in one shared directory. Each agent's own entry file (`CLAUDE.md`, `AGENTS.md`, ...) gets a marked block rendered from the shared `rules.md`; skills are linked in; memory is one fact per file with a generated index. Change it once, every agent sees it. (`PACT.md` section 3)
+
+```
+~/.agentpact/rules.md ──render──▶ CLAUDE.md [agentpact block]
+                       └─render──▶ AGENTS.md [agentpact block]
+~/.agentpact/skills/  ──link────▶ each agent's skill directory
+~/.agentpact/memory/  ◀─read/write─ every agent that supports file memory
+```
+
 - **Conservative by default**: if the environment cannot be determined, it is treated as the highest risk tier; "no record found" never means "allowed".
 - **Two stages**: stage 1 has a human confirm every change; stage 2 (you switch it on) lets the agent only append one stricter rule. Loosening or deleting always goes back to stage 1.
 - **Inventory first, everything optional**: it does not assume you have herdr or hooks. Missing capabilities are reported as "not enabled: reason", with the plain statement "pre-action checks only, nothing enforced".
