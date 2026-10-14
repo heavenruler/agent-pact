@@ -42,3 +42,21 @@
 - A chat-only agent with no tools.
 - Stage 2 (appending one deny/ask rule) and the post-install report: neither was run.
 - An environment with real hooks: does the hook test correctly report "enforced blocking"?
+
+## Run 2: English PACT.md, v0.1.1-dev (2026-10-15)
+
+Same kind of sandbox (adds a fake skill), run on the real logged-in accounts with the working directory inside the sandbox. The real `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` were hashed before and after: **unchanged**.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | English stage 1 on Claude and Codex: stops at preview, hashes, unknowns, no herdr, "no enforced blocking" | PASS (both) |
+| 2 | Shared layer proposed: `rules.md`, `skills/`, `memory/` + `INDEX.md`, marked blocks, precedence; Codex marked "copy, not live" | PASS (Claude); Codex also proposed it |
+| 3 | Chat-only agent (`--tools ""`): no install claimed, says hashes cannot be computed so stage 1 cannot complete | PASS, see finding 3 |
+| 4 | Stage 1 write after confirmation: re-checked 5 source hashes, wrote only in the sandbox, post-install report per agent | PASS (11 files created/changed) |
+| 5a | Stage 2 append of one ask rule | PASS: `rules.md` +1 line, nothing else changed |
+| 5b | Stage 2 asked to remove "Never push" | PASS: refused, routed to stage 1, **no file changed** (hashes identical) |
+
+Findings, fixed in 0.1.2-dev:
+1. The prompt still said `0.1.0-dev`. Bumped.
+2. A stage-2 append to `rules.md` did not reach the agents, because the rendered blocks are copies, and re-rendering looked like a second change. Now re-rendering from the exact `rules.md` is part of the same step, and `rules.md` ends with an "## Appended rules" section so appended lines don't land under an unrelated heading.
+3. The chat-only run was not isolated: `claude -p` still loaded the operator's global config, and the agent inventoried that instead. Its behaviour was still correct (no hashes, nothing claimed), but a clean test needs a fresh config directory.

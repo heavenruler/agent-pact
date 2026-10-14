@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2-dev
+- Verified all open items (docs/sample-run.md, run 2): English stage 1, shared layer, chat-only, stage-1 write, stage-2 append and refusal to loosen.
+- Stage 2 now re-renders blocks from the exact rules.md in the same step; rules.md ends with "## Appended rules".
+- Version string fixed.
+
 ## 0.1.0-dev
 - Added the shared layer (`PACT.md` section 3): one rules source rendered into every agent's entry file, shared skills, shared one-fact-per-file memory, precedence and conflict rules. Not yet dry-run.
 - First release: `PACT.md` (inventory, three modes, two-stage install), `defaults/safety.md`, `modules/boundary-check`.

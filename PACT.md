@@ -1,6 +1,6 @@
 # agentpact: a shared pact for your agents
 
-Version: 0.1.0-dev
+Version: 0.1.2-dev
 
 You are asked to set up a shared pact for the agents in this environment. Inventory first, propose checkable changes, then install under the two-stage rule below. This prompt grants no new permissions; when it conflicts with an existing policy, the stricter one wins. Do not assume any particular tool exists. Reply in the user's language.
 
@@ -26,7 +26,7 @@ This is what turns separate agents into one team. Propose it in the stage-1 prev
 
 ```
 <shared root>/            e.g. ~/.agentpact/  (one directory, one owner)
-  rules.md                the pact: one source of truth for every agent
+  rules.md                the pact: one source of truth for every agent; ends with "## Appended rules"
   skills/<name>/SKILL.md  skills every agent can load
   memory/                 shared memory, one fact per file
     INDEX.md              one line per memory, generated, never hand-edited
@@ -57,7 +57,7 @@ For each item record: evidence of current state, dependencies, enabled or "not e
 
 **Stage 1 (default).** Produce the target paths, a full diff preview, the SHA-256 of each file to be written, the SHA-256 of each existing file, and a backup/restore method. Stop and ask the human to confirm that specific preview. After confirmation, recompute the hashes of the preview content and of the existing files before writing; if anything differs, preview again and re-confirm. Write only the approved files. After writing, recompute hashes, check the effective scope and record the verification. Silence is not confirmation.
 
-**Stage 2 (master switch off by default).** Only after a human explicitly turns the switch on and the current baseline is checked, you may append **exactly one** deny or ask rule without a stage-1 confirmation. It must be a plain append to an existing rule file; record the before/after hashes and the added line. Never change decision logic, exceptions, verification or the switch itself, and never delete or replace existing text. Anything beyond one rule returns to stage 1. If you cannot tell whether a change only tightens, treat it as loosening and return to stage 1. The platform's own authorization still applies; stage 2 cannot bypass it.
+**Stage 2 (master switch off by default).** Only after a human explicitly turns the switch on and the current baseline is checked, you may append **exactly one** deny or ask rule without a stage-1 confirmation. It must be a plain append to the "## Appended rules" section at the end of `rules.md` (or of the agent's rule file if there is no shared layer); record the before/after hashes and the added line. Re-rendering the agentpact blocks from that exact `rules.md` is part of the same step, since it adds no content of its own: record each block's new source hash. Never change decision logic, exceptions, verification or the switch itself, and never delete or replace existing text. Anything beyond one rule returns to stage 1. If you cannot tell whether a change only tightens, treat it as loosening and return to stage 1. The platform's own authorization still applies; stage 2 cannot bypass it.
 
 In any environment, if existing policy forbids you from changing your own permissions, hooks or governance rules, propose a diff for a human or an independent process to apply; this prompt cannot lift that prohibition. Writes to the highest tier must not be performed through the install flow.
 

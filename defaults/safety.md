@@ -1,6 +1,6 @@
 # Conservative defaults (declarative)
 
-Version: 0.1.0-dev
+Version: 0.1.2-dev
 
 These are rule candidates proposed at install time. They never grant more authority than the user and the platform already allow.
 
