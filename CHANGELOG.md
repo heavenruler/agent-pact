@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.1.0-dev（未發布）
-- 初版：`PACT.md`（盤點、三選一模式、兩階段安裝）、`defaults/safety.md`、`modules/boundary-check`。
-- 補上「目標與風險級」盤點與三級風險階梯；統一用語為「最高風險級」。
-- 階段 1 已在 Claude、Codex 各實跑一次（`docs/sample-run.md`）；純聊天 agent、階段 2、寫入後驗收尚未驗證，因此未打 tag。
+## 0.1.0-dev
+- First release: `PACT.md` (inventory, three modes, two-stage install), `defaults/safety.md`, `modules/boundary-check`.
+- Added the "targets and risk tiers" inventory and a three-level risk ladder; unified the term "highest tier".
+- Stage 1 was dry-run once each on Claude and Codex (`docs/sample-run.md`); chat-only agents, stage 2 and the post-install report are not yet verified.
+- Internationalized: English is the default (`README.md`, `PACT.md`, `defaults/`, `modules/`, `docs/`); Traditional Chinese kept as `*.zh-TW.md`.
+- Note: the dry runs used the earlier Traditional Chinese `PACT.md` (commit `116f79c`). The English `PACT.md` has not been re-run.

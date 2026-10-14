@@ -1,70 +1,77 @@
 # agentpact
 
-**一個 prompt，讓你的 AI agent 在進入環境前，先搞清楚「哪些能做、哪些不要碰」。**
+**One prompt that makes your AI agents work out, before they touch an environment, what they may do and what they must leave alone.**
 
-> 這是 prompt，不是防火牆：它讓 agent 自我審查，**不提供強制攔截**。要強制攔截，需要平台的 hook／權限系統（agentpact 會幫你盤點有沒有）。
+English | [繁體中文](README.zh-TW.md)
 
-## 它解決什麼問題
+> This is a prompt, not a firewall. It makes an agent audit itself; it does **not** enforce anything. Enforcement needs your platform's hooks or permission system (agentpact helps you inventory whether you have one).
 
-- agent 一進到新環境（陌生主機、資料庫、repo），憑猜測就動手，做出不可逆的事。
-- 你同時用好幾個 agent（Claude、Codex…），每個對「能不能碰」的理解不同，一個放行、一個拒絕。
-- 每個 agent 的設定檔與 memory 格式都不一樣，用同一份樣板套下去會水土不服。
+## The problem
 
-## 怎麼用（三步）
+- An agent enters a new environment (an unfamiliar host, database or repo) and acts on guesses, doing something irreversible.
+- You run several agents (Claude, Codex, ...). Each has its own idea of what is off limits, so one allows what another refuses.
+- Every agent has a different config and memory format, so one template applied to all of them fits none of them well.
 
-1. 打開 [`PACT.md`](PACT.md)，整份貼給你要設定的 agent。
-2. agent 會先盤點自己的環境，列出「預覽」（要新增或修改的內容與 SHA-256），**停下來等你確認**。
-3. 你確認後它才寫入。每個 agent 各做一次，各自依自己的 memory 與設定格式生成。
+## How to use it (three steps)
 
-## 運作流程
+1. Open [`PACT.md`](PACT.md) and paste the whole file to the agent you want to set up.
+2. The agent inventories its own environment and shows a preview (what it would add or change, with SHA-256 hashes), then **stops and waits for your confirmation**.
+3. Only after you confirm does it write. Do this once per agent; each one generates content from its own memory and config format.
+
+## How it works
 
 ```mermaid
 flowchart TD
-    A[貼上 PACT.md 給 agent] --> B[盤點：設定檔 / memory / hook / 目標與風險級]
-    B --> C{選模式}
-    C -->|沿用| D1[defaults/safety.md]
-    C -->|依現況更新| D2[讀既有 memory 改寫]
-    C -->|疊加| D3[default + 環境特有規則]
-    D1 --> E[階段 1：輸出 diff 預覽 + 雜湊]
+    A[Paste PACT.md to the agent] --> B[Inventory: config / memory / hooks / targets and risk tiers]
+    B --> C{Choose a mode}
+    C -->|Keep default| D1[defaults/safety.md]
+    C -->|Update from current state| D2[Read existing memory and rewrite]
+    C -->|Layer on top| D3[default + environment-specific rules]
+    D1 --> E[Stage 1: diff preview + hashes]
     D2 --> E
     D3 --> E
-    E --> F{你確認？}
-    F -->|否| E
-    F -->|是| G[寫入前再核對雜湊 → 寫入 → 驗收報告]
-    G -.-> H[階段 2：你手動開啟後，agent 只能追加一條更嚴的 deny/ask 規則]
+    E --> F{You confirm?}
+    F -->|no| E
+    F -->|yes| G[Re-check hashes, write, post-install report]
+    G -.-> H[Stage 2: after you switch it on, the agent may only append one stricter deny/ask rule]
 ```
 
-純文字版：
+Plain-text version:
 
 ```
-PACT.md ─▶ 盤點 ─▶ 選模式(沿用/更新/疊加) ─▶ 預覽+雜湊 ─▶ 你確認 ─▶ 寫入 ─▶ 驗收報告
-                                                                  └─(可選)階段 2：只准追加更嚴的規則
+PACT.md -> inventory -> choose mode (keep / update / layer) -> preview + hashes -> you confirm -> write -> report
+                                                                         \-(optional) stage 2: append one stricter rule only
 ```
 
-## 你會得到什麼
+## What you get
 
-| 路徑 | 內容 |
+| Path | Contents |
 |---|---|
-| [`PACT.md`](PACT.md) | 產品本體，唯一要貼的 prompt |
-| [`defaults/safety.md`](defaults/safety.md) | 保守預設：授權來源、風險三級、升級限制、能力檢查 |
-| [`modules/boundary-check/SKILL.md`](modules/boundary-check/SKILL.md) | 選配：agent 進環境時產出「能做／要問／不碰」清單，並在高風險動作前對照 |
-| [`docs/prior-art.md`](docs/prior-art.md) | 同類專案與差異 |
+| [`PACT.md`](PACT.md) | The product itself: the one prompt you paste |
+| [`defaults/safety.md`](defaults/safety.md) | Conservative defaults: source of authority, three risk tiers, escalation limits, capability check |
+| [`modules/boundary-check/SKILL.md`](modules/boundary-check/SKILL.md) | Optional: on entering an environment the agent produces a "can do / ask first / do not touch" list and checks it before risky actions |
+| [`docs/sample-run.md`](docs/sample-run.md) | A recorded stage-1 dry run on Claude and Codex |
+| [`docs/prior-art.md`](docs/prior-art.md) | Similar projects and how this differs |
 
-## 核心設計
+## Design
 
-- **預設保守**：判不出環境，一律當最高風險級；找不到紀錄不等於允許。
-- **兩階段**：階段 1 人確認每次變更；階段 2（需你手動開）只准追加一條更嚴的規則，放寬或刪除一律回階段 1。
-- **全部可選、先盤點**：不假設你有 herdr 或 hook。沒有的能力標「未啟用：原因」，並明說「只有操作前檢查，無強制攔截」。
-- **不套樣板**：各 agent 依自己驗證過的設定與 memory 生成內容。
+- **Conservative by default**: if the environment cannot be determined, it is treated as the highest risk tier; "no record found" never means "allowed".
+- **Two stages**: stage 1 has a human confirm every change; stage 2 (you switch it on) lets the agent only append one stricter rule. Loosening or deleting always goes back to stage 1.
+- **Inventory first, everything optional**: it does not assume you have herdr or hooks. Missing capabilities are reported as "not enabled: reason", with the plain statement "pre-action checks only, nothing enforced".
+- **No fixed template**: each agent generates content from its own verified config and memory.
 
-## 三種環境，預期的結果
+## Expected results in three environments
 
-- **只有 Claude**：列出實際找到的設定、memory、hook；hook 經驗證才標「有強制攔截」。
-- **只有 Codex**：列出 Codex 的設定與 sandbox／批准能力；找不到的 Claude 入口標未知。
-- **純聊天 agent（沒有 hook）**：只交付規則文字與預覽，標「未啟用：平台不支援」，不宣稱已安裝。
+- **Claude only**: lists the settings, memory and hooks it actually found; reports "enforced blocking" only if the hook was verified.
+- **Codex only**: lists Codex's settings and sandbox/approval capabilities; Claude entry points it cannot find are marked unknown.
+- **Chat-only agent (no hooks)**: delivers rule text and an install preview only, marks hooks "not enabled: unsupported by platform", and does not claim anything is installed.
 
-> Claude 與 Codex 的階段 1 已實跑過一次，見 [實跑紀錄](docs/sample-run.md)；純聊天 agent、階段 2 與寫入後驗收還沒驗證。版本為 `0.1.0-dev`，見 [CHANGELOG](CHANGELOG.md)。
+> Stage 1 has been dry-run once each on Claude and Codex (see [sample run](docs/sample-run.md)); chat-only agents, stage 2 and the post-install check are not yet verified. The version is `0.1.0-dev`; see the [CHANGELOG](CHANGELOG.md).
 
-## 授權
+## Languages
+
+English is the default. Traditional Chinese versions are kept alongside as `*.zh-TW.md` (for example [`PACT.zh-TW.md`](PACT.zh-TW.md)). The dry runs were done with the Traditional Chinese prompt; the English prompt tells the agent to reply in the user's language.
+
+## License
 
 [MIT](LICENSE)
