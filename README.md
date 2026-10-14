@@ -63,7 +63,7 @@ PACT.md ─▶ 盤點 ─▶ 選模式(沿用/更新/疊加) ─▶ 預覽+雜�
 - **只有 Codex**：列出 Codex 的設定與 sandbox／批准能力；找不到的 Claude 入口標未知。
 - **純聊天 agent（沒有 hook）**：只交付規則文字與預覽，標「未啟用：平台不支援」，不宣稱已安裝。
 
-> 以上是設計預期，尚未做實跑驗證；版本為 `0.1.0-dev`，見 [CHANGELOG](CHANGELOG.md)。
+> Claude 與 Codex 的階段 1 已實跑過一次，見 [實跑紀錄](docs/sample-run.md)；純聊天 agent、階段 2 與寫入後驗收還沒驗證。版本為 `0.1.0-dev`，見 [CHANGELOG](CHANGELOG.md)。
 
 ## 授權
 
